@@ -23,27 +23,36 @@ local function firstToUpper(str)
   return (str:gsub("^%l", string.upper))
 end
 
+-- Creates a tool with every combination of defs.components with current_materials
 local function regRecursion(current_materials, defs, reg_parts, mat_props)
 	local ind = #current_materials + 1
 	
 	for i = 1, #reg_parts[defs.components[ind]] do --Cycle through tool parts for components
 		current_materials[ind] = reg_parts[defs.components[ind]][i].material
-		
+
 		if #current_materials == #defs.components then
 			local image = ""
-			for i = 1, 2 do
-				local ind = i
-				if defs.draw_order then ind = defs.draw_order[ind] end
 
-				local drawpart = defs.components[ind]
-				if defs.draw_parts then drawpart = defs.draw_parts[ind] end
+			for j = 1, #defs.components do
+				local ord = j
+				if defs.draw_order then ord = defs.draw_order[ord] end
+
+				local drawpart = defs.components[ord]
+				if defs.draw_parts then drawpart = defs.draw_parts[ord] end
 
 				image = image .. "(tinkers_part_" .. drawpart .. ".png^" ..
-					"[multiply:" .. mat_props[current_materials[ind]].color .. ")"
-				if i ~= #defs.components then image = image .. "^" end
+					"[multiply:" .. mat_props[current_materials[ord]].color .. ")"
+				if j ~= #defs.components then image = image .. "^" end
 			end
 
-			minetest.register_tool("tinkers:tool_" .. defs.id .. current_materials[1] .. "_" .. current_materials[2], {
+			local name = ""
+			for j = 1, #defs.components do
+				name = name .. "_" .. current_materials[j]
+			end
+
+			tinkers.tools_registered = tinkers.tools_registered + 1
+
+			minetest.register_tool("tinkers:tool_" .. defs.id .. name, {
 				description = firstToUpper(current_materials[1]) .. " " .. defs.name,
 				tool_capabilities = {
 	    		max_drop_level=3,
@@ -52,9 +61,10 @@ local function regRecursion(current_materials, defs, reg_parts, mat_props)
 	 		  		}
 					},
 					inventory_image = image
-				})
+				}
+			)
 		else
-			regRecursion(current_materials, defs, reg_parts, mat_props)
+			regRecursion(table.copy(current_materials), defs, reg_parts, mat_props)
 		end
 	end
 end
@@ -107,10 +117,9 @@ regBasicTool({
 regBasicTool({
 	id = "mattock",
 	name = "Mattock",
-	components = {"shovel", "axe", "toolrod"},
-	draw_parts = {"shovel", "axe", "toolrod"},
-	-- draw_parts = {"axe", "mattock", "toolrod"},
-	draw_order = {2, 1, 2},
+	components = {"axe", "shovel", "toolrod"},
+	draw_parts = {"axe", "mattock", "toolrod"},
+	draw_order = {2, 3, 1},
 	capabilities = {
 
 	}

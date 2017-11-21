@@ -20,9 +20,9 @@ local material_properties = {
 	},
 	diamond = {
 		color = "#75EEEA",
-		omitted_parts = {
-			"toolrod"
-		}
+		-- omitted_parts = {
+		-- 	"toolrod"
+		-- }
 	},
 	obsidian = {
 		color = "#1F2631"
@@ -62,17 +62,15 @@ for reg_type, reg_func in pairs(tinkers.reg_funcs) do
 	end
 end
 
-print(dump(tool_parts))
-
 dofile(path .. "/tool_reg_funcs.lua")
 
+tinkers.tools_registered = 0;
 for reg_type, reg_func in pairs(tinkers.reg_funcs) do
 	reg_func(tool_parts, material_properties)
 end
+print("[Tinkers] " .. tinkers.tools_registered .. " Tools Registered before modifiers.")
 
 tinkers.reg_funcs = nil
-
-
 
 -- minetest.register_craftitem("tinkers:broadsword_diamond", {
 -- 	description = "Diamond Broadsword",
